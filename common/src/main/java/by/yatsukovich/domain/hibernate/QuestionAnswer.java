@@ -1,5 +1,6 @@
 package by.yatsukovich.domain.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @AllArgsConstructor
@@ -26,10 +29,10 @@ import javax.persistence.Table;
 @Setter
 @Getter
 @EqualsAndHashCode(exclude = {
-        "survey", "questionType"
+        "response", "question"
 })
 @ToString(exclude = {
-        "survey", "questionType"
+        "response", "question"
 })
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
@@ -40,10 +43,19 @@ public class QuestionAnswer {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Embedded
+    /*@Embedded
     @AttributeOverride(name = "questionId", column = @Column(name = "question_id"))
     @AttributeOverride(name = "responseId", column = @Column(name = "response_id"))
-    private QuestionResponseKeys questionResponseKeys;
+    private QuestionResponseKeys questionResponseKeys;*/
+
+    @ManyToOne
+    @JoinColumn(name = "response_id")
+    @JsonBackReference
+    private Response response;
+
+    @ManyToOne
+    @JoinColumn(name = "question_id")
+    private Question question;
 
     @Type(type = "jsonb")
     @Column(name = "answer", columnDefinition = "jsonb")

@@ -1,5 +1,6 @@
 package by.yatsukovich.domain.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -9,15 +10,19 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.AttributeOverride;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -45,6 +50,10 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "question_type_id")
     private QuestionType questionType;
+
+    @OneToMany(mappedBy = "question" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
+    @JsonManagedReference
+    private Set<QuestionAnswer> questionAnswers;
 
     @Embedded
     @AttributeOverride(name = "text", column = @Column(name = "question_text"))

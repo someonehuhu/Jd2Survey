@@ -13,6 +13,7 @@ import javax.persistence.Embeddable;
 @NoArgsConstructor
 @Embeddable
 public class QuestionData {
+
     private String text;
 
     private String resourcePath;
