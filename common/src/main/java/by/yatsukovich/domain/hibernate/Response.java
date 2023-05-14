@@ -35,9 +35,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {
         "survey", "responder"
 })
-@ToString(exclude = {
-        "survey", "responder"
-})
+@ToString()
 @Entity
 @Table(name = "response")
 public class Response {
@@ -53,13 +51,14 @@ public class Response {
     private Survey survey;
 
     @ManyToOne
-    @JoinColumn(name = "responder_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     @ToString.Exclude
     private User responder;
 
     @OneToMany(mappedBy = "response" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
+    @ToString.Exclude
     private Set<QuestionAnswer> questionAnswer;
 
     @Column(name = "response_status")
@@ -69,6 +68,13 @@ public class Response {
     @Column(name = "completion_date")
     private Timestamp completionDate;
 
+    @Column(name = "created_on")
+    private Timestamp created;
 
+    @Column(name = "changed_on")
+    private Timestamp changed;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
 
 }

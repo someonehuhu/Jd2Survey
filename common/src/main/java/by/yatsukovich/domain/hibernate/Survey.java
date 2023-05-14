@@ -33,31 +33,32 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {
         "owner", "responses", "questions", "mailings"
 })
-@ToString(exclude = {
-        "owner", "responses", "questions", "mailings"
-})
+@ToString()
 @Table(name = "survey")
 public class Survey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "survey_id", nullable = false)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
     @JsonBackReference
+    @ToString.Exclude
     private User owner;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
+    @ToString.Exclude
     private Set<Question> questions;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
-    //@ToString.Exclude
+    @ToString.Exclude
     private Set<Response> responses;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+    @ToString.Exclude
     private Set<Mailing> mailings;
 
     @Column(name = "share_link")
@@ -75,5 +76,12 @@ public class Survey {
     @Column(name = "time_limit")
     private long timeLimit;
 
+    @Column(name = "created_on")
+    private Timestamp created;
 
+    @Column(name = "changed_on")
+    private Timestamp changed;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
 }

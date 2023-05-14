@@ -1,4 +1,4 @@
-package by.yatsukovich.domain.hibernate;
+package by.yatsukovich.domain.embeddable;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,7 @@ import javax.persistence.Embeddable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
+@Deprecated
 public class QuestionResponseKeys {
     private Long questionId;
 

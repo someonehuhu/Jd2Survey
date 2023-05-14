@@ -1,5 +1,6 @@
 package by.yatsukovich.domain.hibernate;
 
+import by.yatsukovich.domain.embeddable.QuestionData;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -18,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,19 +29,18 @@ import javax.persistence.Table;
 @EqualsAndHashCode(exclude = {
         "question"
 })
-@ToString(exclude = {
-        "question"
-})
+@ToString()
 @Entity
 @Table(name = "question_field")
 public class QuestionField {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "question_field_id", nullable = false)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @ToString.Exclude
     private Question question;
 
     @Embedded
@@ -49,6 +50,15 @@ public class QuestionField {
 
     @Column(name = "is_right")
     private Boolean isRight;
+
+    @Column(name = "created_on")
+    private Timestamp created;
+
+    @Column(name = "changed_on")
+    private Timestamp changed;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
 
 
 

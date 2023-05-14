@@ -12,9 +12,7 @@ import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
-import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,35 +30,39 @@ import javax.persistence.Table;
 @EqualsAndHashCode(exclude = {
         "response", "question"
 })
-@ToString(exclude = {
-        "response", "question"
-})
+@ToString()
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(name = "question_answer")
 public class QuestionAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "question_answer_id", nullable = false)
     private Long id;
-
-    /*@Embedded
-    @AttributeOverride(name = "questionId", column = @Column(name = "question_id"))
-    @AttributeOverride(name = "responseId", column = @Column(name = "response_id"))
-    private QuestionResponseKeys questionResponseKeys;*/
 
     @ManyToOne
     @JoinColumn(name = "response_id")
     @JsonBackReference
+    @ToString.Exclude
     private Response response;
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @ToString.Exclude
     private Question question;
 
     @Type(type = "jsonb")
     @Column(name = "answer", columnDefinition = "jsonb")
     private Answer answer;
+
+    @Column(name = "created_on")
+    private Timestamp created;
+
+    @Column(name = "changed_on")
+    private Timestamp changed;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
 
 
 }

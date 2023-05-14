@@ -1,4 +1,4 @@
-package by.yatsukovich.domain.hibernate;
+package by.yatsukovich.domain.embeddable;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

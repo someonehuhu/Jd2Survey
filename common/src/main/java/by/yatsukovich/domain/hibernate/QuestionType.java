@@ -20,6 +20,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -30,15 +31,13 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = {
         "questions"
 })
-@ToString(exclude = {
-        "questions"
-})
+@ToString()
 @Entity
 @Table(name = "c_question_type")
 public class QuestionType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "question_type_id", nullable = false)
     private Long id;
 
     @Column(name = "question_type")
@@ -46,6 +45,16 @@ public class QuestionType {
     private QuestionKind questionKind;
 
     @OneToMany(mappedBy = "questionType", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+    @ToString.Exclude
     private Set<Question> questions;
+
+    @Column(name = "created_on")
+    private Timestamp created;
+
+    @Column(name = "changed_on")
+    private Timestamp changed;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
 
 }
