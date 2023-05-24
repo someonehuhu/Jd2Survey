@@ -1,6 +1,7 @@
 package by.yatsukovich.domain.hibernate;
 
 import by.yatsukovich.domain.embeddable.QuestionData;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -40,6 +41,7 @@ public class QuestionField {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonBackReference
     @ToString.Exclude
     private Question question;
 

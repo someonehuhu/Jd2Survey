@@ -3,7 +3,7 @@ package by.yatsukovich.domain.enums;
 import lombok.Getter;
 
 @Getter
-public enum QuestionKind {
+public enum QuestionTypes {
     PLAIN, CHECKBOX, DROP_DOWN_LIST
 
     /*private Integer code;

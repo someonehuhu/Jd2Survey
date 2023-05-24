@@ -1,5 +1,6 @@
 package by.yatsukovich.domain.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -39,6 +40,7 @@ public class Mailing {
     @ManyToOne
     @JoinColumn(name = "survey_id")
     @ToString.Exclude
+    @JsonBackReference
     private Survey survey;
 
     @Column(name = "created_on")

@@ -32,5 +32,5 @@ spring:
 ---
 
 jwtconfig:
-  secret: secret
-  expiration: 6000
+  secret: e975c2f9-be13-4b3d-8279-1bd7a65d296e
+  expiration: 600_000

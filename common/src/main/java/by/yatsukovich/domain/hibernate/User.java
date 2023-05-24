@@ -2,6 +2,7 @@ package by.yatsukovich.domain.hibernate;
 
 
 import by.yatsukovich.domain.embeddable.AuthenticationInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -20,10 +23,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -32,7 +39,7 @@ import java.util.Set;
 @Setter
 @Getter
 @EqualsAndHashCode(exclude = {
-        "surveys", "responses"
+        "surveys", "responses", "userRoles"
 })
 @ToString()
 @Entity
@@ -44,6 +51,17 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @JsonIgnoreProperties("users")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @ToString.Exclude
+    private List<UserRole> userRoles;
+
     //SonarLint advice to remove @AnnotationOverrides wrapper from annotation group
     @Embedded
     @AttributeOverride(name = "email", column = @Column(name = "email"))
@@ -53,12 +71,12 @@ public class User {
     @OneToMany(mappedBy = "responder" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
     @ToString.Exclude
-    private Set<Response> responses = Collections.emptySet();
+    private List<Response> responses = Collections.emptyList();
 
     @OneToMany(mappedBy = "owner" , cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
     @JsonManagedReference
     @ToString.Exclude
-    private Set<Survey> surveys = Collections.emptySet();
+    private List<Survey> surveys = Collections.emptyList();
 
     @Column(name = "created_on")
     private Timestamp created;

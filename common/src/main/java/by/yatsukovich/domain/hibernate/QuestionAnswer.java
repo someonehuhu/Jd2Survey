@@ -48,6 +48,7 @@ public class QuestionAnswer {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonBackReference
     @ToString.Exclude
     private Question question;
 

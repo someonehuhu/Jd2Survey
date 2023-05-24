@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,7 +22,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -50,19 +53,20 @@ public class Survey {
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
     @ToString.Exclude
-    private Set<Question> questions;
+    private List<Question> questions;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
     @ToString.Exclude
-    private Set<Response> responses;
+    private List<Response> responses;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+    @JsonManagedReference
     @ToString.Exclude
-    private Set<Mailing> mailings;
+    private List<Mailing> mailings;
 
-    @Column(name = "share_link")
-    private String shareLink;
+    @Column(name = "survey_name")
+    private String name;
 
     @Column(name = "access_codeword")
     private String accessCodeword;
@@ -74,7 +78,7 @@ public class Survey {
     private Timestamp validityDate;
 
     @Column(name = "time_limit")
-    private long timeLimit;
+    private Long timeLimit;
 
     @Column(name = "created_on")
     private Timestamp created;

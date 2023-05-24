@@ -25,6 +25,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -59,7 +60,7 @@ public class Response {
     @OneToMany(mappedBy = "response" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
     @ToString.Exclude
-    private Set<QuestionAnswer> questionAnswer;
+    private List<QuestionAnswer> questionAnswer;
 
     @Column(name = "response_status")
     @Enumerated(EnumType.STRING)

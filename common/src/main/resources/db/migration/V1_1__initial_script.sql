@@ -1,6 +1,6 @@
 CREATE TABLE if not exists public.users (
 	user_id bigserial PRIMARY KEY,
-	name VARCHAR ( 50 ) UNIQUE NOT NULL,
+	name VARCHAR ( 50 ) NOT NULL,
 	email VARCHAR ( 255 ) UNIQUE NOT NULL,
 	password VARCHAR ( 50 ) NOT NULL,
 	created_on TIMESTAMP not null default now(),
@@ -9,10 +9,21 @@ CREATE TABLE if not exists public.users (
 	constraint mail_check check (email like '%_@__%.__%')
 );
 
+create table if not exists public.c_roles (
+    role_id bigserial primary key,
+    role_name varchar( 50 ) unique not null
+);
+
+create table if not exists public.users_roles (
+    users_roles_id bigserial primary key,
+    user_id bigint not null references users(user_id),
+    role_id bigint not null references c_roles(role_id)
+);
+
 create table if not exists public.survey (
 	survey_id bigserial primary key,
+	survey_name varchar (50) not null,
 	owner_id bigint not null,
-	share_link varchar (250) unique not null,
 	access_codeword varchar (15), -- nullable
 	responders_limit integer, -- nullable
 	validity_date TIMESTAMP, --nullable
@@ -41,25 +52,25 @@ create table if not exists public.response (
 	/*FOREIGN KEY(status_id) REFERENCES "c_response_status"(status_id)*/
 );
 
-create table if not exists public.c_question_type (
-	question_type_id bigserial primary key,
-	question_type varchar (30) unique not null,
-	created_on TIMESTAMP not null default now(),
-	changed_on TIMESTAMP not null default now(),
-	is_deleted BOOLEAN DEFAULT false not null
-);
+--create table if not exists public.c_question_type (
+--	question_type_id bigserial primary key,
+--	question_type varchar (30) unique not null,
+--	created_on TIMESTAMP not null default now(),
+--	changed_on TIMESTAMP not null default now(),
+--	is_deleted BOOLEAN DEFAULT false not null
+--);
 
 create table if not exists public.question (
 	question_id bigserial primary key,
 	question_text varchar (200) not null,
 	resource_path varchar(100),
 	mandatory boolean default true not null,
-	question_type_id bigint not null,
+	question_type varchar (50) not null,
 	survey_id bigint not null,
 	created_on TIMESTAMP not null default now(),
 	changed_on TIMESTAMP not null default now(),
 	is_deleted BOOLEAN DEFAULT false not null,
-	FOREIGN KEY(question_type_id) REFERENCES c_question_type(question_type_id),
+	--FOREIGN KEY(question_type_id) REFERENCES c_question_type(question_type_id),
 	FOREIGN KEY(survey_id) REFERENCES survey(survey_id)
 );
 

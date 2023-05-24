@@ -18,4 +18,7 @@ public class JWTConfiguration {
     private String secret;
 
     private Integer expiration;
+
+    //TODO delete and generate unique salt for every user??
+    private String serverPasswordSalt;
 }

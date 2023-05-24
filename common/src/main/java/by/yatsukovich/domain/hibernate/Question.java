@@ -1,6 +1,8 @@
 package by.yatsukovich.domain.hibernate;
 
 import by.yatsukovich.domain.embeddable.QuestionData;
+import by.yatsukovich.domain.enums.QuestionTypes;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +11,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +30,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -32,7 +39,7 @@ import java.util.Set;
 @Setter
 @Getter
 @EqualsAndHashCode(exclude = {
-        "survey", "questionType"
+        "survey", "questionFields", "questionAnswers"
 })
 @ToString()
 @Entity
@@ -45,17 +52,28 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "survey_id")
+    @JsonBackReference
     @ToString.Exclude
     private Survey survey;
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name = "question_type_id")
+    @JsonManagedReference
     @ToString.Exclude
-    private QuestionType questionType;
+    private QuestionType questionType;*/
+
+    @Column(name = "question_type")
+    @Enumerated(EnumType.STRING)
+    private QuestionTypes type;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JsonManagedReference
+    private List<QuestionField> questionFields;
 
     @OneToMany(mappedBy = "question" , cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
     @JsonManagedReference
-    private Set<QuestionAnswer> questionAnswers;
+    private List<QuestionAnswer> questionAnswers;
 
     @Embedded
     @AttributeOverride(name = "text", column = @Column(name = "question_text"))

@@ -23,7 +23,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Object> getAllUsers() {
         /*List<User> users = userService.findAll();*/
-        Optional<User> user = userService.findByEmail("124@mail.ru");
+        Optional<User> user = userService.findByEmailNotDeleted("124@mail.ru");
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
