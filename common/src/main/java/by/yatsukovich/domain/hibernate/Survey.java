@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,10 +24,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -80,12 +80,17 @@ public class Survey {
     @Column(name = "time_limit")
     private Long timeLimit;
 
+
     @Column(name = "created_on")
+    @CreationTimestamp
     private Timestamp created;
 
     @Column(name = "changed_on")
+    @UpdateTimestamp
     private Timestamp changed;
 
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private boolean isDeleted;
+
+
 }

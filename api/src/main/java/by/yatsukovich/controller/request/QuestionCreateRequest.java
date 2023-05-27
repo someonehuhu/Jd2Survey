@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class QuestionCreateRequest {
     private String questionText;
 
     @NotNull
-    private boolean mandatory;
+    private Boolean mandatory;
 
-    private List<QuestionFieldCreateRequest>  questionFieldCreateRequests;
+    private List<QuestionFieldCreateRequest> questionFields;
 }

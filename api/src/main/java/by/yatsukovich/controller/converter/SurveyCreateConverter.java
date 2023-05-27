@@ -1,5 +1,7 @@
 package by.yatsukovich.controller.converter;
 
+import by.yatsukovich.controller.mapper.SurveyContext;
+import by.yatsukovich.controller.mapper.SurveyMapper;
 import by.yatsukovich.controller.request.SurveyCreateRequest;
 import by.yatsukovich.domain.hibernate.Survey;
 import lombok.RequiredArgsConstructor;
@@ -10,15 +12,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SurveyCreateConverter implements Converter<SurveyCreateRequest, Survey> {
 
+    private final SurveyMapper surveyMapper;
+
     @Override
     public Survey convert(SurveyCreateRequest source) {
 
-        return Survey.builder()
-                .name(source.getName())
-                .accessCodeword(source.getAccessCodeword())
-                .respondersLimit(source.getRespondersLimit())
-                .validityDate(null)
-                .timeLimit(source.getTimeLimit())
-                .build();
+        return surveyMapper.surveyCreateRequestToSurvey(source, new Survey());
+
     }
 }

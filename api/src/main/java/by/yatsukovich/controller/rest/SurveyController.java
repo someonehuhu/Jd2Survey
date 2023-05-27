@@ -1,5 +1,7 @@
 package by.yatsukovich.controller.rest;
 
+import by.yatsukovich.controller.dto.SurveyDto;
+import by.yatsukovich.controller.mapper.SurveyMapper;
 import by.yatsukovich.controller.request.SurveyCreateRequest;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,27 +39,37 @@ public class SurveyController {
 
     private final PrincipalUtils principalUtils;
 
+    private final SurveyMapper surveyMapper;
+
     @PostMapping
-    ResponseEntity<Object> saveSurvey(
+    ResponseEntity<Map<String, Object>> saveSurvey(
             Principal principal,
             @Valid @RequestBody SurveyCreateRequest surveyCreateRequest,
             BindingResult result) {
+        Map<String, Object> resultMap;
 
         if (result.hasErrors()) {
-            throw new RuntimeException("Errors on create: " + result.getModel().values());
+            resultMap = result.getModel();
+            return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
         }
         //get user by principles
         String username = principalUtils.getUsername(principal);
         Optional<User> optionalUser = userService.findByEmailNotDeleted(username);
 
         if (optionalUser.isPresent()) {
-            Survey survey = compositeSurveyConverter.convertFromCreateRequest(surveyCreateRequest);
+            Survey survey = conversionService.convert(surveyCreateRequest, Survey.class);
             survey.setOwner(optionalUser.get());
             survey = surveyService.save(survey);
 
-            return new ResponseEntity<>(survey, HttpStatus.CREATED);
+            SurveyDto surveyDto = surveyMapper.surveyToSurveyDTO(survey);
+
+            resultMap = Map.of("survey", surveyDto);
+
+            return new ResponseEntity<>(resultMap, HttpStatus.CREATED);
         } else {
-            throw new RuntimeException("User not found by principles !");
+            //unreachable statement?
+            resultMap = Map.of("Error", "User not found by principles !");
+            return new ResponseEntity<>(resultMap, HttpStatus.FORBIDDEN);
         }
 
     }

@@ -9,8 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,13 +59,15 @@ public class QuestionAnswer {
     private Answer answer;
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private Timestamp created;
 
     @Column(name = "changed_on")
+    @UpdateTimestamp
     private Timestamp changed;
 
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private boolean isDeleted;
 
 
 }

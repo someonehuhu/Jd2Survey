@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findByEmailNotDeleted(String email) {
-        return userRepository.findOneByAuthenticationInfoEmailAndDeletedFalse(email);
+        return userRepository.findOneByAuthenticationInfoEmailAndIsDeletedFalse(email);
     }
 
     @Override

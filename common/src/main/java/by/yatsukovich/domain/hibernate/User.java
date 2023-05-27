@@ -11,8 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -79,11 +81,13 @@ public class User {
     private List<Survey> surveys = Collections.emptyList();
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private Timestamp created;
 
     @Column(name = "changed_on")
+    @UpdateTimestamp
     private Timestamp changed;
 
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private boolean isDeleted;
 }

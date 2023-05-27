@@ -48,9 +48,9 @@ public class TestController {
 
         Survey survey = Survey.builder()
                 .name("test_survey")
-                .created(current)
+               /* .created(current)
                 .changed(current)
-                .deleted(false)
+                //.deleted(false)*/
                 .build();
         survey.setOwner(optionalUser.get());
 
@@ -66,10 +66,10 @@ public class TestController {
                             .text(i + " question")
                             .build())
                     .mandatory(false)
-                    .type(QuestionTypes.PLAIN)
-                    .deleted(false)
+                    //.type(QuestionTypes.PLAIN)
+                    /*.deleted(false)
                     .changed(current)
-                    .created(current)
+                    .created(current)*/
                     .build();
 
             questions.add(question);

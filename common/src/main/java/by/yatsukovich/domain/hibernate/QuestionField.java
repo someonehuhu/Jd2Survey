@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -51,16 +53,18 @@ public class QuestionField {
     private QuestionData questionData;
 
     @Column(name = "is_right")
-    private Boolean isRight;
+    private Boolean right;
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private Timestamp created;
 
     @Column(name = "changed_on")
+    @UpdateTimestamp
     private Timestamp changed;
 
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private boolean isDeleted;
 
 
 

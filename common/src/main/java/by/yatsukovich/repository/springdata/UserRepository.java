@@ -12,6 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Deprecated
     public Optional<User> findOneByAuthenticationInfoEmail(String mail);
 
-    public Optional<User> findOneByAuthenticationInfoEmailAndDeletedFalse(String mail);
+    public Optional<User> findOneByAuthenticationInfoEmailAndIsDeletedFalse(String mail);
 
 }

@@ -11,8 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -56,15 +58,9 @@ public class Question {
     @ToString.Exclude
     private Survey survey;
 
-    /*@ManyToOne
-    @JoinColumn(name = "question_type_id")
-    @JsonManagedReference
-    @ToString.Exclude
-    private QuestionType questionType;*/
-
     @Column(name = "question_type")
     @Enumerated(EnumType.STRING)
-    private QuestionTypes type;
+    private QuestionTypes questionType;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
     @Fetch(value = FetchMode.SUBSELECT)
@@ -84,12 +80,14 @@ public class Question {
     private Boolean mandatory;
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private Timestamp created;
 
     @Column(name = "changed_on")
+    @UpdateTimestamp
     private Timestamp changed;
 
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private boolean isDeleted;
 
 }
