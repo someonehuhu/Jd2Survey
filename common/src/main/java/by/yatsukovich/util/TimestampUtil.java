@@ -12,7 +12,7 @@ public class TimestampUtil {
         return Calendar.getInstance().getTimeInMillis();
     }
 
-    public Timestamp getCurrentTimestamp() {
+    public Timestamp now() {
         return new Timestamp(getCurrentTimeMillis());
     }
 }

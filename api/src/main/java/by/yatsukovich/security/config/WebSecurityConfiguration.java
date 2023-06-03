@@ -66,10 +66,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/swagger-ui.html#").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/guest/**").permitAll()
+                //.antMatchers("/guest/**").permitAll()
                 .antMatchers("/registration/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers("/test/**").permitAll()
+                .antMatchers("/rest/surveys/**").permitAll()
                 .antMatchers("/rest/**").hasAnyRole("ADMIN", "USER", "MODERATOR")
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated();

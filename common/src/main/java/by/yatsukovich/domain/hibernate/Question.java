@@ -33,7 +33,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -77,7 +76,7 @@ public class Question {
     private QuestionData questionData;
 
     @Column(name = "mandatory")
-    private Boolean mandatory;
+    private boolean isMandatory;
 
     @Column(name = "created_on")
     @CreationTimestamp

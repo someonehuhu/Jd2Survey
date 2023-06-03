@@ -1,12 +1,13 @@
 package by.yatsukovich.controller.rest;
 
 import by.yatsukovich.controller.dto.SurveyDto;
+import by.yatsukovich.controller.mapper.ResponseMapper;
 import by.yatsukovich.controller.mapper.SurveyMapper;
 import by.yatsukovich.controller.request.SurveyCreateRequest;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
-import by.yatsukovich.security.util.CompositeSurveyConverter;
 import by.yatsukovich.security.util.PrincipalUtils;
+import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.SurveyService;
 import by.yatsukovich.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,15 +34,32 @@ public class SurveyController {
 
     private final ConversionService conversionService;
 
-    private final CompositeSurveyConverter compositeSurveyConverter;
-
     private final SurveyService surveyService;
+
+    private final ResponseService responseService;
 
     private final UserService userService;
 
     private final PrincipalUtils principalUtils;
 
     private final SurveyMapper surveyMapper;
+
+    private final ResponseMapper responseMapper;
+
+    @GetMapping("/{surveyId}")
+    ResponseEntity<Map<String, Object>> getSurvey(@PathVariable Long surveyId) {
+
+        if (surveyId != null && surveyId > 0) {
+            Survey survey = surveyService.findById(surveyId);
+            SurveyDto surveyDto = surveyMapper.surveyToSurveyDTO(survey);
+            return new ResponseEntity<>(Map.of("survey", surveyDto), HttpStatus.OK);
+
+
+        } else {
+            return new ResponseEntity<>(Map.of("error", "Illegal id"), HttpStatus.BAD_REQUEST);
+        }
+
+    }
 
     @PostMapping
     ResponseEntity<Map<String, Object>> saveSurvey(
@@ -53,11 +73,10 @@ public class SurveyController {
             return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
         }
         //get user by principles
-        String username = principalUtils.getUsername(principal);
-        Optional<User> optionalUser = userService.findByEmailNotDeleted(username);
+        Optional<User> optionalUser = principalUtils.getUserOptional(principal);
 
         if (optionalUser.isPresent()) {
-            Survey survey = conversionService.convert(surveyCreateRequest, Survey.class);
+            Survey survey = surveyMapper.surveyCreateRequestToSurvey(surveyCreateRequest, new Survey());
             survey.setOwner(optionalUser.get());
             survey = surveyService.save(survey);
 

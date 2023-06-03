@@ -1,7 +1,6 @@
 package by.yatsukovich.controller.rest;
 
 import by.yatsukovich.domain.embeddable.QuestionData;
-import by.yatsukovich.domain.enums.QuestionTypes;
 import by.yatsukovich.domain.hibernate.Question;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
@@ -44,7 +43,7 @@ public class TestController {
 
         Optional<User> optionalUser = userService.findByEmailNotDeleted("admin@mail.ru");
 
-        Timestamp current = timestampUtil.getCurrentTimestamp();
+        Timestamp current = timestampUtil.now();
 
         Survey survey = Survey.builder()
                 .name("test_survey")
@@ -65,7 +64,7 @@ public class TestController {
                     .questionData(QuestionData.builder()
                             .text(i + " question")
                             .build())
-                    .mandatory(false)
+                    .isMandatory(false)
                     //.type(QuestionTypes.PLAIN)
                     /*.deleted(false)
                     .changed(current)

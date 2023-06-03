@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 @Builder
 @Setter
@@ -15,9 +15,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Answer implements Serializable {
-    private Long questionId;
 
-    private Set<Long> chosenFields;
+    private List<Long> chosenFields;
 
     private String answerText;
 

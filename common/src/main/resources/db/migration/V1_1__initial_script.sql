@@ -40,10 +40,10 @@ create table if not exists public.response (
 	user_id bigint not null, -- nullable if ip add??
 	survey_id bigint not null,
 	response_status varchar(25) not null,
-	completion_date TIMESTAMP not null default now(),
+	completion_date TIMESTAMP,
 	--address (ip)
-	answers jsonb not null,
-	spent_time bigint not null,
+	--answers jsonb not null,
+	spent_time bigint,
 	created_on TIMESTAMP not null default now(),
 	changed_on TIMESTAMP not null default now(),
 	is_deleted BOOLEAN DEFAULT false not null,
