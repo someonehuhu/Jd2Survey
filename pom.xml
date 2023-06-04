@@ -28,6 +28,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons.lang.version>3.12.0</commons.lang.version>
+        <log4j>1.2.17</log4j>
     </properties>
 
     <dependencies>
@@ -96,6 +97,12 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>1.5.3.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j}</version>
         </dependency>
 
         <!-- utils-->
