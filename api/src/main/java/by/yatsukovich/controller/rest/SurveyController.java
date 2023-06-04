@@ -18,6 +18,7 @@ import by.yatsukovich.service.SurveyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,6 +52,7 @@ public class SurveyController {
 
     private final ExceptionMessageGenerator exceptionMessageGenerator;
 
+    @Transactional()
     @GetMapping("/{surveyId}")
     ResponseEntity<Map<String, Object>> getSurvey(Principal principal, @PathVariable Long surveyId) {
 
@@ -74,6 +75,7 @@ public class SurveyController {
 
     }
 
+    @Transactional()
     @GetMapping("/{surveyId}/responses/{responseId}")
     ResponseEntity<Map<String, Object>> getSurveyResponse(
             @PathVariable Long surveyId,
@@ -102,6 +104,7 @@ public class SurveyController {
 
     }
 
+    @Transactional()
     @GetMapping("/{surveyId}/responses")
     ResponseEntity<Map<String, Object>> getSurveyStats(
             Principal principal,
@@ -130,6 +133,7 @@ public class SurveyController {
 
     }
 
+    @Transactional()
     @PostMapping
     ResponseEntity<Map<String, Object>> saveSurvey(
             Principal principal,

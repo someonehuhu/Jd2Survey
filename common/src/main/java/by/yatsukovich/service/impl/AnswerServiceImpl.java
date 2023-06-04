@@ -9,6 +9,7 @@ import by.yatsukovich.exception.ExceptionMessageGenerator;
 import by.yatsukovich.exception.ValidationException;
 import by.yatsukovich.repository.springdata.QuestionRepository;
 import by.yatsukovich.service.AnswerService;
+import by.yatsukovich.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +25,32 @@ public class AnswerServiceImpl implements AnswerService {
 
     private final ExceptionMessageGenerator exceptionMessageGenerator;
 
+    private final QuestionService questionService;
+
+    @Deprecated
     @Override
     public QuestionAnswer validateAnswerAndMapToDomain(AnswerView answerView) {
         Optional<Question> questionOptional = questionRepository.findById(answerView.getQuestionId());
+        if (questionOptional.isPresent()) {
+            Question question = questionOptional.get();
+            Answer answer = answerView.getAnswer();
+            switch (question.getQuestionType()) {
+                case PLAIN -> validatePlain(question, answer);
+                case CHECKBOX -> validateCheckbox(question, answer);
+                case DROP_DOWN_LIST -> validateDropdownList(question, answer);
+            }
+            return QuestionAnswer.builder()
+                    .answer(answer)
+                    .question(question)
+                    .build();
+        } else {
+            throw new ValidationException("Question with specified id not exists!");
+        }
+    }
+
+    @Override
+    public QuestionAnswer validateAnswerViewByQuestions(AnswerView answerView, List<Question> questions) {
+        Optional<Question> questionOptional = questionService.findFromListById(answerView.getQuestionId(), questions);
         if (questionOptional.isPresent()) {
             Question question = questionOptional.get();
             Answer answer = answerView.getAnswer();

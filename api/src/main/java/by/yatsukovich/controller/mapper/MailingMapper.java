@@ -2,9 +2,7 @@ package by.yatsukovich.controller.mapper;
 
 import by.yatsukovich.controller.dto.MailingDto;
 import by.yatsukovich.controller.request.MailingCreateRequest;
-import by.yatsukovich.controller.request.QuestionCreateRequest;
 import by.yatsukovich.domain.hibernate.Mailing;
-import by.yatsukovich.domain.hibernate.Question;
 import by.yatsukovich.domain.hibernate.Survey;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;

@@ -4,26 +4,29 @@ import by.yatsukovich.controller.dto.DraftResponseDto;
 import by.yatsukovich.controller.dto.ResponseDto;
 import by.yatsukovich.controller.mapper.AnswerViewMapper;
 import by.yatsukovich.controller.mapper.ResponseMapper;
-import by.yatsukovich.controller.request.DraftResponseRequest;
 import by.yatsukovich.controller.request.PutResponseAnswersRequest;
 import by.yatsukovich.domain.hibernate.Response;
 import by.yatsukovich.domain.hibernate.User;
 import by.yatsukovich.domain.hibernate.view.AnswerView;
 import by.yatsukovich.exception.EntityNotFoundException;
 import by.yatsukovich.exception.ExceptionMessageGenerator;
+import by.yatsukovich.exception.ValidationException;
 import by.yatsukovich.security.util.PrincipalUtils;
+import by.yatsukovich.security.util.ValidationUtils;
 import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.SurveyService;
 import by.yatsukovich.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -50,17 +53,19 @@ public class ResponseController {
 
     private final ExceptionMessageGenerator exceptionMessageGenerator;
 
+    private final ValidationUtils validationUtils;
 
-    @PostMapping()
+
+    @Transactional()
+    @PostMapping("/surveys/{surveyId}")
     public ResponseEntity<Map<String, Object>> createDraftResponse(
-            @Valid @RequestBody DraftResponseRequest draftResponseRequest,
-            BindingResult result,
+            @PathVariable Long surveyId,
+            @RequestParam String accessCodeword,
             Principal principal) {
         Map<String, Object> resultMap;
 
-        if (result.hasErrors()) {
-            resultMap = result.getModel();
-            return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
+        if (!validationUtils.positive(surveyId)) {
+            throw new ValidationException("Illegal surveyId");
         }
 
         Optional<User> optionalUser = principalUtils.getUserOptional(principal);
@@ -68,11 +73,12 @@ public class ResponseController {
         if (optionalUser.isPresent()) {
             Response response = responseService.draftResponse(
                     principalUtils.getUsername(principal),
-                    draftResponseRequest.getSurveyId(),
-                    draftResponseRequest.getAccessCodeword()
+                    surveyId,
+                    accessCodeword
             );
             DraftResponseDto draftedResponse = responseMapper.responseToDraftResponseDto(response);
             resultMap = Map.of("draftedResponse", draftedResponse);
+
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } else {
             resultMap = Map.of("Error", "User not found by principles !");
@@ -80,6 +86,7 @@ public class ResponseController {
         }
     }
 
+    @Transactional()
     @PutMapping("/{responseId}")
     public ResponseEntity<Map<String, Object>> putResponseAnswers(
             @PathVariable Long responseId,
@@ -98,7 +105,7 @@ public class ResponseController {
             Response response = responseService.getDraftedUserResponse(responderOptional.get(), responseId);
             //
             List<AnswerView> answerViews = answerViewMapper.answerCreateRequestsToAnswerViews(updateResponseRequest.getAnswerCreateRequests());
-            response = responseService.saveResponseAnswers(response, updateResponseRequest.getSpentTime(), answerViews);
+            response = responseService.validateAndSaveAnswers(response, updateResponseRequest.getSpentTime(), answerViews);
             //
             ResponseDto responseDto = responseMapper.responseToResponseDto(response);
 

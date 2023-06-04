@@ -18,6 +18,8 @@ public interface ResponseService {
 
     Response saveResponseAnswers(Response response, Long spentTime, List<AnswerView> answerViews);
 
+    Response validateAndSaveAnswers(Response response, Long spentTime, List<AnswerView> answerViews);
+
     Response getSurveyResponse(Long responseId, Long surveyId);
 
 

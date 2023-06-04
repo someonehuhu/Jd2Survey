@@ -8,6 +8,8 @@ import by.yatsukovich.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @Service
@@ -42,6 +44,14 @@ public class QuestionServiceImpl implements QuestionService {
                 answer -> !answer.getChosenFields().isEmpty()
         );
     }
+
+    @Override
+    public Optional<Question> findFromListById(Long id, List<Question> questions) {
+        return questions.stream().
+                filter(question -> question.getId().equals(id))
+                .findFirst();
+    }
+
 
     private void validateMandatory(Question sourceQuestion, Answer answer, Predicate<Answer> validatePredicate) {
         if (sourceQuestion.isMandatory()) {
