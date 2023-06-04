@@ -9,6 +9,8 @@ import by.yatsukovich.controller.request.PutResponseAnswersRequest;
 import by.yatsukovich.domain.hibernate.Response;
 import by.yatsukovich.domain.hibernate.User;
 import by.yatsukovich.domain.hibernate.view.AnswerView;
+import by.yatsukovich.exception.EntityNotFoundException;
+import by.yatsukovich.exception.ExceptionMessageGenerator;
 import by.yatsukovich.security.util.PrincipalUtils;
 import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.SurveyService;
@@ -45,6 +47,8 @@ public class ResponseController {
     private final ResponseMapper responseMapper;
 
     private final AnswerViewMapper answerViewMapper;
+
+    private final ExceptionMessageGenerator exceptionMessageGenerator;
 
 
     @PostMapping()
@@ -89,7 +93,6 @@ public class ResponseController {
             resultMap = bindingResult.getModel();
             return new ResponseEntity<>(resultMap, HttpStatus.BAD_REQUEST);
         }
-
         Optional<User> responderOptional = principalUtils.getUserOptional(principal);
         if (responderOptional.isPresent()) {
             Response response = responseService.getDraftedUserResponse(responderOptional.get(), responseId);
@@ -101,7 +104,10 @@ public class ResponseController {
 
             return new ResponseEntity<>(Map.of("response", responseDto), HttpStatus.OK);
         } else {
-            throw new RuntimeException("Responder not found!");
+            String username = principalUtils.getUsername(principal);
+            String message = exceptionMessageGenerator.generateUserNotFoundMessage(username);
+
+            throw new EntityNotFoundException(message);
         }
 
     }

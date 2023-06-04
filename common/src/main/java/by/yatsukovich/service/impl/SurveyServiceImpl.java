@@ -11,7 +11,7 @@ import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.view.QuestionFieldStats;
 import by.yatsukovich.domain.hibernate.view.QuestionStats;
 import by.yatsukovich.domain.hibernate.view.SurveyStats;
-import by.yatsukovich.exception.ResponseDraftValidationException;
+import by.yatsukovich.exception.ResponseDraftDeniedException;
 import by.yatsukovich.repository.springdata.QuestionAnswerRepository;
 import by.yatsukovich.repository.springdata.ResponseRepository;
 import by.yatsukovich.repository.springdata.SurveyRepository;
@@ -128,7 +128,7 @@ public class SurveyServiceImpl implements SurveyService {
     private void validateAccessCodeword(String surveyCodeWord, String toValidate) {
         if (surveyCodeWord != null) {
             if (!surveyCodeWord.equals(toValidate)) {
-                throw new ResponseDraftValidationException("illegal codeword");
+                throw new ResponseDraftDeniedException("illegal codeword");
             }
         }
     }
@@ -136,7 +136,7 @@ public class SurveyServiceImpl implements SurveyService {
     private void validateOnExpired(Timestamp toValidate) {
         if (toValidate != null) {
             if (timestampUtil.now().before(toValidate)) {
-                throw new ResponseDraftValidationException("expired");
+                throw new ResponseDraftDeniedException("expired");
             }
         }
     }
@@ -145,7 +145,7 @@ public class SurveyServiceImpl implements SurveyService {
         long currentCount = responseRepository.countBySurveyIdWithStatus(surveyId, ResponseStatus.TIME_EXPIRED);
         if (respondersLimit != null) {
             if (respondersLimit.compareTo((int) ++currentCount) < 0) {
-                throw new ResponseDraftValidationException("out of limit");
+                throw new ResponseDraftDeniedException("out of limit");
             }
         }
     }

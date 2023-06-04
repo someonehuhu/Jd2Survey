@@ -5,7 +5,8 @@ import by.yatsukovich.domain.hibernate.Question;
 import by.yatsukovich.domain.hibernate.QuestionAnswer;
 import by.yatsukovich.domain.hibernate.QuestionField;
 import by.yatsukovich.domain.hibernate.view.AnswerView;
-import by.yatsukovich.repository.springdata.QuestionFieldRepository;
+import by.yatsukovich.exception.ExceptionMessageGenerator;
+import by.yatsukovich.exception.ValidationException;
 import by.yatsukovich.repository.springdata.QuestionRepository;
 import by.yatsukovich.service.AnswerService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class AnswerServiceImpl implements AnswerService {
 
     private final QuestionRepository questionRepository;
 
-    private final QuestionFieldRepository questionFieldRepository;
+    private final ExceptionMessageGenerator exceptionMessageGenerator;
 
     @Override
     public QuestionAnswer validateAnswerAndMapToDomain(AnswerView answerView) {
@@ -39,7 +40,7 @@ public class AnswerServiceImpl implements AnswerService {
                     .question(question)
                     .build();
         } else {
-            throw new RuntimeException("Question with specified id not exists!");
+            throw new ValidationException("Question with specified id not exists!");
         }
     }
 
@@ -58,7 +59,7 @@ public class AnswerServiceImpl implements AnswerService {
     private void validateDropdownList(Question question, Answer answer) {
         validateDropdownListQuestionMandatory(question, answer);
         if (answer.getChosenFields().size() != 1) {
-            throw new RuntimeException("Dropdown list validation exception!");
+            throw new ValidationException("Dropdown list validation exception.The only field must be chosen.");
         }
         validateChosenFields(question, answer.getChosenFields());
     }
@@ -71,7 +72,7 @@ public class AnswerServiceImpl implements AnswerService {
                     .findAny();
             //
             if (foundOptional.isEmpty()) {
-                throw new RuntimeException("Chosen field does not exist!");
+                throw new ValidationException("Chosen field does not exist in question with id =" + question.getId());
             }
         });
     }
@@ -79,7 +80,8 @@ public class AnswerServiceImpl implements AnswerService {
     private void validateMandatory(Question sourceQuestion, Answer answer, Predicate<Answer> validatePredicate) {
         if (sourceQuestion.isMandatory()) {
             if (!validatePredicate.test(answer)) {
-                throw new RuntimeException("Question mandatory validation failed!");
+                String message = exceptionMessageGenerator.generateMandatoryValidationMessage(sourceQuestion.getId());
+                throw new ValidationException(message);
             }
         }
     }

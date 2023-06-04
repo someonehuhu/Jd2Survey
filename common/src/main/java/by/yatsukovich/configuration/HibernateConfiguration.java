@@ -1,6 +1,9 @@
 package by.yatsukovich.configuration;
 
+import by.yatsukovich.exception.ExceptionMessageGenerator;
+import by.yatsukovich.util.RandomValuesGenerator;
 import org.hibernate.SessionFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 
@@ -29,6 +32,11 @@ public class HibernateConfiguration {
         Properties properties = new Properties();
         properties.put("hibernate.show_sql", "true");
         return properties;
+    }
+
+    @Bean
+    public ExceptionMessageGenerator getExceptionMessageGenerator() {
+        return new ExceptionMessageGenerator();
     }
 
 }

@@ -9,6 +9,8 @@ import by.yatsukovich.domain.hibernate.Response;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
 import by.yatsukovich.domain.hibernate.view.SurveyStats;
+import by.yatsukovich.exception.EntityNotFoundException;
+import by.yatsukovich.exception.ExceptionMessageGenerator;
 import by.yatsukovich.security.util.PrincipalUtils;
 import by.yatsukovich.security.util.ValidationUtils;
 import by.yatsukovich.service.ResponseService;
@@ -47,6 +49,8 @@ public class SurveyController {
     private final ResponseMapper responseMapper;
 
     private final ValidationUtils validationUtils;
+
+    private final ExceptionMessageGenerator exceptionMessageGenerator;
 
     @GetMapping("/{surveyId}")
     ResponseEntity<Map<String, Object>> getSurvey(Principal principal, @PathVariable Long surveyId) {
@@ -87,7 +91,10 @@ public class SurveyController {
                     return new ResponseEntity<>(Map.of("Error", "Forbidden"), HttpStatus.FORBIDDEN);
                 }
             } else {
-                throw new RuntimeException("User not found");
+                String username = principalUtils.getUsername(principal);
+                String message = exceptionMessageGenerator.generateUserNotFoundMessage(username);
+
+                throw new EntityNotFoundException(message);
             }
         } else {
             return new ResponseEntity<>(Map.of("Error", "Illegal path variables!"), HttpStatus.BAD_REQUEST);
@@ -112,7 +119,10 @@ public class SurveyController {
 
                 return new ResponseEntity<>(Map.of("surveyStats", surveyStats), HttpStatus.OK);
             } else {
-                throw new RuntimeException("User not found");
+                String username = principalUtils.getUsername(principal);
+                String message = exceptionMessageGenerator.generateUserNotFoundMessage(username);
+
+                throw new EntityNotFoundException(message);
             }
         } else {
             return new ResponseEntity<>(Map.of("Error", "Illegal path variables!"), HttpStatus.BAD_REQUEST);

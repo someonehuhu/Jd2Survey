@@ -12,9 +12,10 @@ import by.yatsukovich.domain.hibernate.User;
 import by.yatsukovich.domain.hibernate.view.AnswerView;
 import by.yatsukovich.domain.hibernate.view.QuestionFieldStats;
 import by.yatsukovich.domain.hibernate.view.QuestionStats;
-import by.yatsukovich.domain.hibernate.view.SurveyStats;
-import by.yatsukovich.exception.ResponseDraftValidationException;
-import by.yatsukovich.repository.springdata.QuestionAnswerRepository;
+import by.yatsukovich.exception.DraftDeniedCause;
+import by.yatsukovich.exception.EntityNotFoundException;
+import by.yatsukovich.exception.ExceptionMessageGenerator;
+import by.yatsukovich.exception.ResponseDraftDeniedException;
 import by.yatsukovich.repository.springdata.ResponseRepository;
 import by.yatsukovich.repository.springdata.SurveyRepository;
 import by.yatsukovich.service.AnswerService;
@@ -22,9 +23,6 @@ import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.UserService;
 import by.yatsukovich.util.TimestampUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +48,7 @@ public class ResponseServiceImpl implements ResponseService {
 
     private final QuestionFieldStatsConverter questionFieldStatsConverter;
 
-    private final QuestionAnswerRepository questionAnswerRepository;
+    private final ExceptionMessageGenerator exceptionMessageGenerator;
 
     @Override
     public Response getDraftedUserResponse(User responder, Long responseId) {
@@ -62,10 +60,11 @@ public class ResponseServiceImpl implements ResponseService {
 
                 return response;
             } else {
-                throw new RuntimeException("Illegal responder id!");
+                throw new IllegalArgumentException("Illegal responder id = " + responder.getId());
             }
         } else {
-            throw new RuntimeException("Response not found!");
+            String message = exceptionMessageGenerator.generateEntityNotFoundMessage(Response.class.getName(), responseId);
+            throw new EntityNotFoundException(message);
         }
     }
 
@@ -74,25 +73,37 @@ public class ResponseServiceImpl implements ResponseService {
     public Response draftResponse(String responderName, Long surveyId, String accessCodeword) {
         Survey survey = surveyRepository.findByIdAndIsDeletedFalse(surveyId);
         if (survey != null) {
-            Optional<User> responder = userService.findByEmailNotDeleted(responderName);
+            Optional<User> optionalUser = userService.findByEmailNotDeleted(responderName);
 
-            if (responder.isPresent()) {
+            if (optionalUser.isPresent()) {
+                User responder = optionalUser.get();
+                //check if already exists
+                Optional<Response> optionalResponse = survey.getResponses().stream()
+                        .filter(response -> response.getResponder().equals(responder))
+                        .findFirst();
+                if (optionalResponse.isPresent()) {
+                    String message = exceptionMessageGenerator.generateDraftDeniedMessage(DraftDeniedCause.ALREADY_EXISTS);
+                    throw new ResponseDraftDeniedException(message);
+                }
+
                 validateAccessCodeword(survey.getAccessCodeword(), accessCodeword);
                 validateOnExpired(timestampUtil.now());
                 validateRespondersLimit(surveyId, survey.getRespondersLimit());
 
                 Response response = Response.builder()
-                        .responder(responder.get())
+                        .responder(responder)
                         .survey(survey)
                         .responseStatus(ResponseStatus.DRAFTED)
                         .build();
 
                 return responseRepository.save(response);
             } else {
-                throw new RuntimeException("Responder not found!");
+                String message = exceptionMessageGenerator.generateUserNotFoundMessage(responderName);
+                throw new EntityNotFoundException(message);
             }
         }
-        throw new RuntimeException("Survey not found!");
+        String message = exceptionMessageGenerator.generateEntityNotFoundMessage(Survey.class.getName(), surveyId);
+        throw new EntityNotFoundException(message);
 
     }
 
@@ -174,7 +185,6 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
 
-
     private boolean validateResponseDuration(Response response) {
         Long timeLimit = response.getSurvey().getTimeLimit();
         if (timeLimit != null) {
@@ -188,7 +198,8 @@ public class ResponseServiceImpl implements ResponseService {
     private void validateAccessCodeword(String surveyCodeWord, String toValidate) {
         if (surveyCodeWord != null) {
             if (!surveyCodeWord.equals(toValidate)) {
-                throw new ResponseDraftValidationException("illegal codeword");
+                String message = exceptionMessageGenerator.generateDraftDeniedMessage(DraftDeniedCause.ILLEGAL_CODEWORD);
+                throw new ResponseDraftDeniedException(message);
             }
         }
     }
@@ -196,7 +207,8 @@ public class ResponseServiceImpl implements ResponseService {
     private void validateOnExpired(Timestamp toValidate) {
         if (toValidate != null) {
             if (timestampUtil.now().before(toValidate)) {
-                throw new ResponseDraftValidationException("expired");
+                String message = exceptionMessageGenerator.generateDraftDeniedMessage(DraftDeniedCause.EXPIRED);
+                throw new ResponseDraftDeniedException(message);
             }
         }
     }
@@ -205,7 +217,7 @@ public class ResponseServiceImpl implements ResponseService {
         long currentCount = responseRepository.countBySurveyIdWithStatus(surveyId, ResponseStatus.SUCCESS);
         if (respondersLimit != null) {
             if (respondersLimit.compareTo((int) ++currentCount) < 0) {
-                throw new ResponseDraftValidationException("out of limit");
+                throw new ResponseDraftDeniedException("out of limit");
             }
         }
     }
