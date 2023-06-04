@@ -1,11 +1,18 @@
 package by.yatsukovich.service.impl;
 
+import by.yatsukovich.domain.converter.QuestionFieldStatsConverter;
+import by.yatsukovich.domain.converter.QuestionStatsConverter;
 import by.yatsukovich.domain.enums.ResponseStatus;
+import by.yatsukovich.domain.hibernate.Question;
 import by.yatsukovich.domain.hibernate.QuestionAnswer;
+import by.yatsukovich.domain.hibernate.QuestionField;
 import by.yatsukovich.domain.hibernate.Response;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
 import by.yatsukovich.domain.hibernate.view.AnswerView;
+import by.yatsukovich.domain.hibernate.view.QuestionFieldStats;
+import by.yatsukovich.domain.hibernate.view.QuestionStats;
+import by.yatsukovich.domain.hibernate.view.SurveyStats;
 import by.yatsukovich.exception.ResponseDraftValidationException;
 import by.yatsukovich.repository.springdata.QuestionAnswerRepository;
 import by.yatsukovich.repository.springdata.ResponseRepository;
@@ -15,6 +22,9 @@ import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.UserService;
 import by.yatsukovich.util.TimestampUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +46,11 @@ public class ResponseServiceImpl implements ResponseService {
 
     private final AnswerService answerValidationService;
 
-    private final QuestionAnswerRepository answerRepository;
+    private final QuestionStatsConverter questionStatsConverter;
+
+    private final QuestionFieldStatsConverter questionFieldStatsConverter;
+
+    private final QuestionAnswerRepository questionAnswerRepository;
 
     @Override
     public Response getDraftedUserResponse(User responder, Long responseId) {
@@ -107,6 +121,59 @@ public class ResponseServiceImpl implements ResponseService {
 
         return responseRepository.save(response);
     }
+
+    @Override
+    public Response getSurveyResponse(Long responseId, Long surveyId) {
+        return responseRepository.findByIdAndSurveyId(responseId, surveyId);
+    }
+
+    private QuestionStats getStatsFromPlainQuestion(Question question) {
+
+        return getStatsFromQuestion(question);
+    }
+
+    private QuestionStats getStatsFromSelectiveQuestion(Question question) {
+        QuestionStats questionStats = getStatsFromQuestion(question);
+
+        List<QuestionFieldStats> questionFieldStatsList = question.getQuestionFields().stream()
+                .map(this::getStatsFromQuestionField)
+                .toList();
+
+        questionStats.setQuestionFieldStats(questionFieldStatsList);
+
+        return questionStats;
+    }
+
+    private QuestionStats getStatsFromQuestion(Question question) {
+        QuestionStats questionStats = questionStatsConverter.fromQuestion(question);
+        questionStats.setAnswerNumber((long) question.getQuestionAnswers().size());
+
+        return questionStats;
+    }
+
+    private QuestionFieldStats getStatsFromQuestionField(QuestionField questionField) {
+        Question question = questionField.getQuestion();
+        QuestionFieldStats questionFieldStats = questionFieldStatsConverter.fromQuestionField(questionField);
+
+        long answersNumber = question.getQuestionAnswers().stream()
+                .filter(questionAnswer -> questionTypesMatches(questionAnswer, question))
+                .filter(questionAnswer -> questionFieldIdsMatches(questionAnswer, questionField))
+                .count();
+        questionFieldStats.setAnswersNumber(answersNumber);
+
+        return questionFieldStats;
+    }
+
+    private boolean questionTypesMatches(QuestionAnswer questionAnswer, Question question) {
+        return questionAnswer.getQuestion().getQuestionType()
+                .equals(question.getQuestionType());
+    }
+
+    private boolean questionFieldIdsMatches(QuestionAnswer questionAnswer, QuestionField questionField) {
+        return questionAnswer.getAnswer().getChosenFields().contains(questionField.getId());
+    }
+
+
 
     private boolean validateResponseDuration(Response response) {
         Long timeLimit = response.getSurvey().getTimeLimit();

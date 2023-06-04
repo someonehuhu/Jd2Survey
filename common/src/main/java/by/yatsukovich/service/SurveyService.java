@@ -1,16 +1,18 @@
 package by.yatsukovich.service;
 
 import by.yatsukovich.domain.hibernate.Survey;
+import by.yatsukovich.domain.hibernate.view.SurveyStats;
 
 import java.util.Optional;
 
 public interface SurveyService {
 
-    public Survey save(Survey survey);
+    Survey save(Survey survey);
 
-    public Survey findById(Long id);
+    Survey findById(Long id);
 
-    public Survey draftSurvey(Long responderId, Long surveyId, String accessCodeword);
+    SurveyStats getSurveyStats(Long surveyId, int page, int size);
+
 
 
 }

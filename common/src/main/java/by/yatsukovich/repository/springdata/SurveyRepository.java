@@ -9,4 +9,5 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
     Survey findByIdAndIsDeletedFalse(Long id);
 
+
 }

@@ -94,7 +94,7 @@ public class ResponseController {
         if (responderOptional.isPresent()) {
             Response response = responseService.getDraftedUserResponse(responderOptional.get(), responseId);
             //
-            List<AnswerView> answerViews = answerViewMapper.answerCreateRequestsToAnswerView(updateResponseRequest.getAnswerCreateRequests());
+            List<AnswerView> answerViews = answerViewMapper.answerCreateRequestsToAnswerViews(updateResponseRequest.getAnswerCreateRequests());
             response = responseService.saveResponseAnswers(response, updateResponseRequest.getSpentTime(), answerViews);
             //
             ResponseDto responseDto = responseMapper.responseToResponseDto(response);

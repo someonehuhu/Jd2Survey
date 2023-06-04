@@ -49,9 +49,7 @@ public class AnswerServiceImpl implements AnswerService {
 
     private void validateCheckbox(Question question, Answer answer) {
         validateCheckBoxQuestionMandatory(question, answer);
-        if (answer.getChosenFields().size() != 1) {
-            throw new RuntimeException("Checkbox validation exception!");
-        }
+
         validateChosenFields(question, answer.getChosenFields());
 
 
@@ -59,6 +57,9 @@ public class AnswerServiceImpl implements AnswerService {
 
     private void validateDropdownList(Question question, Answer answer) {
         validateDropdownListQuestionMandatory(question, answer);
+        if (answer.getChosenFields().size() != 1) {
+            throw new RuntimeException("Dropdown list validation exception!");
+        }
         validateChosenFields(question, answer.getChosenFields());
     }
 

@@ -11,5 +11,5 @@ import java.util.List;
 )
 public interface AnswerViewMapper {
 
-    List<AnswerView> answerCreateRequestsToAnswerView(List<AnswerCreateRequest> answerCreateRequests);
+    List<AnswerView> answerCreateRequestsToAnswerViews(List<AnswerCreateRequest> answerCreateRequests);
 }

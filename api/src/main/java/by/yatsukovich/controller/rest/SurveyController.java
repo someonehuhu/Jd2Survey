@@ -1,17 +1,19 @@
 package by.yatsukovich.controller.rest;
 
+import by.yatsukovich.controller.dto.ResponseDto;
 import by.yatsukovich.controller.dto.SurveyDto;
 import by.yatsukovich.controller.mapper.ResponseMapper;
 import by.yatsukovich.controller.mapper.SurveyMapper;
 import by.yatsukovich.controller.request.SurveyCreateRequest;
+import by.yatsukovich.domain.hibernate.Response;
 import by.yatsukovich.domain.hibernate.Survey;
 import by.yatsukovich.domain.hibernate.User;
+import by.yatsukovich.domain.hibernate.view.SurveyStats;
 import by.yatsukovich.security.util.PrincipalUtils;
+import by.yatsukovich.security.util.ValidationUtils;
 import by.yatsukovich.service.ResponseService;
 import by.yatsukovich.service.SurveyService;
-import by.yatsukovich.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,10 +22,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,13 +36,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SurveyController {
 
-    private final ConversionService conversionService;
-
     private final SurveyService surveyService;
 
     private final ResponseService responseService;
-
-    private final UserService userService;
 
     private final PrincipalUtils principalUtils;
 
@@ -46,17 +46,76 @@ public class SurveyController {
 
     private final ResponseMapper responseMapper;
 
+    private final ValidationUtils validationUtils;
+
     @GetMapping("/{surveyId}")
-    ResponseEntity<Map<String, Object>> getSurvey(@PathVariable Long surveyId) {
+    ResponseEntity<Map<String, Object>> getSurvey(Principal principal, @PathVariable Long surveyId) {
 
-        if (surveyId != null && surveyId > 0) {
+        if (validationUtils.positive(surveyId)) {
             Survey survey = surveyService.findById(surveyId);
-            SurveyDto surveyDto = surveyMapper.surveyToSurveyDTO(survey);
-            return new ResponseEntity<>(Map.of("survey", surveyDto), HttpStatus.OK);
-
-
+            Optional<User> optionalUser = principalUtils.getUserOptional(principal);
+            if (optionalUser.isPresent()) {
+                SurveyDto surveyDto = surveyMapper.surveyToSurveyDTO(survey);
+                if (survey.getOwner().equals(optionalUser.get())) {
+                    return new ResponseEntity<>(Map.of("survey", surveyDto), HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(Map.of("error", "Illegal user id"), HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                return new ResponseEntity<>(Map.of("error", "User not found"), HttpStatus.BAD_REQUEST);
+            }
         } else {
             return new ResponseEntity<>(Map.of("error", "Illegal id"), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @GetMapping("/{surveyId}/responses/{responseId}")
+    ResponseEntity<Map<String, Object>> getSurveyResponse(
+            @PathVariable Long surveyId,
+            @PathVariable Long responseId,
+            Principal principal
+    ) {
+        if (validationUtils.positive(surveyId) && validationUtils.positive(responseId)) {
+            Optional<User> optionalOwner = principalUtils.getUserOptional(principal);
+            if (optionalOwner.isPresent()) {
+                Response response = responseService.getSurveyResponse(responseId, surveyId);
+                if (response.getSurvey().getOwner().equals(optionalOwner.get())) {
+                    ResponseDto responseDto = responseMapper.responseToResponseDto(response);
+                    return new ResponseEntity<>(Map.of("response", responseDto), HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(Map.of("Error", "Forbidden"), HttpStatus.FORBIDDEN);
+                }
+            } else {
+                throw new RuntimeException("User not found");
+            }
+        } else {
+            return new ResponseEntity<>(Map.of("Error", "Illegal path variables!"), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @GetMapping("/{surveyId}/responses")
+    ResponseEntity<Map<String, Object>> getSurveyStats(
+            Principal principal,
+            @PathVariable Long surveyId,
+            @RequestParam Integer page,
+            @RequestParam Integer size
+    ) {
+        if (validationUtils.positive(surveyId)
+                && validationUtils.nonNull(page)
+                && validationUtils.positive(size)) {
+            Optional<User> optionalOwner = principalUtils.getUserOptional(principal);
+
+            if (optionalOwner.isPresent()) {
+                SurveyStats surveyStats = surveyService.getSurveyStats(surveyId, page, size);
+
+                return new ResponseEntity<>(Map.of("surveyStats", surveyStats), HttpStatus.OK);
+            } else {
+                throw new RuntimeException("User not found");
+            }
+        } else {
+            return new ResponseEntity<>(Map.of("Error", "Illegal path variables!"), HttpStatus.BAD_REQUEST);
         }
 
     }
