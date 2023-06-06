@@ -53,6 +53,9 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @Column(name = "name")
+    private String name;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
